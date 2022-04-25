@@ -100,7 +100,6 @@ class AKT(Module):
 
     def reset(self):
         for p in self.parameters():
-            # question이 존재하며, difficult_param 일때! \mu_{q_t}
             if p.size(0) == self.num_questions + 1 and self.num_questions > 0:
                 torch.nn.init.constant_(p, 0.0)
 
@@ -130,7 +129,7 @@ class AKT(Module):
                 qr_embed_data = qr_embed_data + pid_embed_data * qr_embed_diff_data
             else:
                 # y_t = e_{(c_t, r_t)} + \mu_{q_t} * f_{(c_t, r_t)}
-                # 이때 e_{(c_t, r_t)} = c_{c_t} + g_{r_t}
+                # , where e_{(c_t, r_t)} = c_{c_t} + g_{r_t}
                 # f_{(c_t, r_t)} = f_{(c_t, r_t)} + d_{c_t}
                 # e_{(c_t, r_t)} + \mu_{q_t} * (h_{r_t} + d_{c_t})
                 qr_embed_data = qr_embed_data + pid_embed_data * (

@@ -170,9 +170,6 @@ def collate_question_response_fn(batches, pad_val=-1):
         targets.append(FloatTensor(batch["responses"][1:]))
         deltas.append(LongTensor(batch["questions"][1:]))
 
-    """
-    pad_sequence를 통해 list of LongTensor가 [B x L (=200)] 의 Tensor로 변환됨
-    """
     questions = pad_sequence(questions, batch_first=True, padding_value=pad_val)
     responses = pad_sequence(responses, batch_first=True, padding_value=pad_val)
     targets = pad_sequence(targets, batch_first=True, padding_value=pad_val)
@@ -188,8 +185,7 @@ def collate_question_response_fn(batches, pad_val=-1):
     )
 
     """
-    seq_len=10, pad_val=-1 일때 예제
-
+    When seq_len=10 and pad_val=-1,
 
     questions[10], responses[10], targets[10], deltas[10]
         (tensor([78, 78, 30, 30, 30, 15, 15, 15, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -235,9 +231,6 @@ def collate_question_skill_response_fn(batches, pad_val=-1):
         delta_questions.append(LongTensor(batch["questions"][1:]))
         delta_skills.append(LongTensor(batch["skills"][1:]))
 
-    """
-    pad_sequence를 통해 list of LongTensor가 [B x L (=200)] 의 Tensor로 변환됨
-    """
     questions = pad_sequence(questions, batch_first=True, padding_value=pad_val)
     skills = pad_sequence(skills, batch_first=True, padding_value=pad_val)
     responses = pad_sequence(responses, batch_first=True, padding_value=pad_val)
@@ -258,35 +251,6 @@ def collate_question_skill_response_fn(batches, pad_val=-1):
         delta_skills * masks,
     )
 
-    """
-    seq_len=10, pad_val=-1 일때 예제
-
-
-    questions[10], responses[10], targets[10], deltas[10]
-        (tensor([78, 78, 30, 30, 30, 15, 15, 15, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                -1, -1]),
-        tensor([ 1,  1,  1,  1,  1,  0,  1,  1,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                -1, -1]),
-        tensor([ 1.,  1.,  1.,  1.,  0.,  1.,  1.,  1., -1., -1., -1., -1., -1., -1.,
-                -1., -1., -1., -1., -1., -1.]),
-        tensor([78, 30, 30, 30, 15, 15, 15, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                -1, -1]))
-
-    masks[10]
-        tensor([ True,  True,  True,  True,  True,  True,  True,  True, False, False,
-                False, False, False, False, False, False, False, False, False, False])
-
-    (questions * masks)[10], (responses*masks)[10], (targets*masks)[10], (deltas*masks)[10]
-        (tensor([78, 78, 30, 30, 30, 15, 15, 15,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-                0,  0]),
-        tensor([1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
-        tensor([1., 1., 1., 1., 0., 1., 1., 1., -0., -0., -0., -0., -0., -0., -0., -0., -0., -0.,
-                -0., -0.]),
-        tensor([78, 30, 30, 30, 15, 15, 15, 15,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-                0,  0]))
-        
-    """
-
     return questions, skills, responses, targets, delta_questions, delta_skills, masks
 
 
@@ -301,9 +265,6 @@ def collate_fn(batches):
         skills.append(LongTensor(batch["skills"]))
         responses.append(LongTensor(batch["responses"]))
 
-    """
-    pad_sequence를 통해 list of LongTensor가 [B x L (=200)] 의 Tensor로 변환됨
-    """
     questions = pad_sequence(questions, batch_first=True, padding_value=0)
     skills = pad_sequence(skills, batch_first=True, padding_value=0)
     responses = pad_sequence(responses, batch_first=True, padding_value=-1)
@@ -334,9 +295,6 @@ def augmented_collate_fn(batches):
         aug_r_seq_2.append(LongTensor(batch["responses"][1]))
         aug_r_seq.append(LongTensor(batch["responses"][2]))
 
-    """
-    pad_sequence를 통해 list of LongTensor가 [B x L (=200)] 의 Tensor로 변환됨
-    """
     aug_q_seq_1 = pad_sequence(aug_q_seq_1, batch_first=True, padding_value=0)
 
     aug_q_seq_2 = pad_sequence(aug_q_seq_2, batch_first=True, padding_value=0)
