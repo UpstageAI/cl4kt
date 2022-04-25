@@ -1,0 +1,98 @@
+
+model_name: dkt
+dataset_path: "/home/wonsunglee/workspace/dkt/data/research"
+data_name: assistments09
+checkpoint_dir: .ckpts
+seed: 2021
+
+
+dkt_config:
+  embedding_dim: 128
+  hidden_dim: 128
+  num_layers: 1
+  dropout: 0.2
+
+dkvmn_config:
+  key_dim: 50
+  value_dim: 50
+  num_concepts: 64
+
+sakt_config:
+  embedding_dim: 128
+  num_layers: 2
+  num_attn_heads: 8
+  dropout: 0.2
+
+akt_config:
+  embedding_dim: 64
+  num_blocks: 2
+  kq_same: True
+  model_type: "akt"
+  num_attn_heads: 8
+  final_fc_dim: 512
+  d_ff: 1024
+  l2: 0.0001
+  dropout: 0.2
+  separate_qr: False
+
+cl4kt_config:
+  hidden_dim: 64
+  num_blocks: 2
+  num_attn_heads: 2
+  dropout: 0.5
+  reg_cl: 0.2
+  q_mask_prob: 0.2
+  s_mask_prob: 0.2
+  r_mask_prob: 0.2
+
+train_config:
+  sequence_option: "split" # or split
+  seq_len: 100
+  train_ratio: 0.8
+  batch_size: 128 # DKVMN의 경우 batch_size가 크면 성능이 많이 떨어짐
+  eval_batch_size: 512
+  num_epochs: 300
+  print_epochs: 1
+  clip_grad: 2.0
+  max_grad_norm: 2.0
+  learning_rate: 0.001
+  optimizer: adam
+  
+  loss: BCE
+
+  ## Model Save
+  save_model: False
+  save_epochs: 1
+  save_model_name: "tmp"
+  log_path: "logs"
+
+
+
+
+#     "train_config": {
+
+#     },
+#     "dkt": {
+#         "emb_size": 256,
+#         "hidden_size": 256,
+#         "n_layers": 2
+#     },
+#     "dkvmn": {
+#         "dim_k": 50,
+#         "dim_v": 50,
+#         "N": 64
+#     },
+#     "sakt": {
+#         "n": 200,
+#         "d": 30,
+#         "num_attn_heads": 5,
+#         "dropout": 0.2
+#     },
+#     "ssakt": {
+#         "n": 200,
+#         "d": 30,
+#         "num_attn_heads": 5,
+#         "num_attn_layers": 3,
+#         "dropout": 0.2
+#     }
+# }
