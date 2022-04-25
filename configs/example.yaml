@@ -3,6 +3,18 @@ dataset_path: "./dataset"
 checkpoint_dir: .ckpts
 seed: 12405
 
+akt_config:
+  embedding_size: 64
+  num_blocks: 2
+  kq_same: True
+  model_type: "akt"
+  num_attn_heads: 8
+  final_fc_dim: 512
+  d_ff: 1024
+  l2: 0.0
+  dropout: 0.05
+  separate_qr: False
+  
 cl4kt_config:
   hidden_size: 64
   num_blocks: 2

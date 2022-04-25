@@ -3,6 +3,6 @@ This is our implementation for the paper "Contrastive Learning for Knowledge Tra
 
 To run CL4KT, please specify the configuration file (`/configs/example.yaml`) and preprocess dataset (e.g., `/datatset/algebra05`).
 
-Then, use the following command:
+Then, use the following script:
 
 `CUDA_VISIBLE_DEVICES=0 python main.py --model_name cl4kt --data_name algebra05 --mask_prob 0.5 --crop_prob 0.3 --permute_prob 0.5 --replace_prob 0.5 --reg_cl 0.1`

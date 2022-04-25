@@ -1,4 +1,3 @@
-import wandb
 import os
 import argparse
 import numpy as np
@@ -55,12 +54,6 @@ def main(config):
     learning_rate = train_config.learning_rate
     optimizer = train_config.optimizer
     seq_len = train_config.seq_len
-
-    wandb.init(
-        project="dkt",
-        entity="muzekaline",
-        name="{}_{}_{}".format(data_name, model_name, train_config.sequence_option),
-    )
 
     if train_config.sequence_option == "recent":  # the most recent N interactions
         dataset = MostRecentQuestionSkillDataset
@@ -204,71 +197,6 @@ def main(config):
     test_rmse = np.mean(test_rmses)
     test_rmse_std = np.std(test_rmses)
 
-    """
-    wandb init
-    """
-
-    wandb_config = wandb.config
-
-    wandb_config.data_name = data_name
-    wandb_config.model_name = model_name
-    wandb_config.learning_rate = learning_rate
-    wandb_config.seq_len = seq_len
-    wandb_config.l2 = model_config.l2
-    wandb_config.batch_size = batch_size
-    wandb_config.dropout = model_config.dropout
-
-    if model_name == "cl4kt":
-        wandb_config.reg_cl = model_config.reg_cl
-        wandb_config.mask_prob = model_config.mask_prob
-        wandb_config.crop_prob = model_config.crop_prob
-        wandb_config.permute_prob = model_config.permute_prob
-        wandb_config.replace_prob = model_config.replace_prob
-        wandb_config.negative_prob = model_config.negative_prob
-        wandb_config.num_blocks = model_config.num_blocks
-        wandb_config.num_attn_heads = model_config.num_attn_heads
-    else:
-        wandb_config.num_blocks = model_config.num_blocks
-        wandb_config.num_attn_heads = model_config.num_attn_heads
-
-    if train_config.log_wandb_fold:
-        wandb.log(
-            {
-                "auc": test_auc,
-                "acc": test_acc,
-                "rmse": test_rmse,
-                "auc_std": test_auc_std,
-                "acc_std": test_acc_std,
-                "rmse_std": test_rmse_std,
-                "auc-1": test_aucs[0],
-                "auc-2": test_aucs[1],
-                "auc-3": test_aucs[2],
-                "auc-4": test_aucs[3],
-                "auc-5": test_aucs[4],
-                "acc-1": test_accs[0],
-                "acc-2": test_accs[1],
-                "acc-3": test_accs[2],
-                "acc-4": test_accs[3],
-                "acc-5": test_accs[4],
-                "rmse-1": test_rmses[0],
-                "rmse-2": test_rmses[1],
-                "rmse-3": test_rmses[2],
-                "rmse-4": test_rmses[3],
-                "rmse-5": test_rmses[4],
-            }
-        )
-    else:
-        wandb.log(
-            {
-                "auc": test_auc,
-                "acc": test_acc,
-                "rmse": test_rmse,
-                "auc_std": test_auc_std,
-                "acc_std": test_acc_std,
-                "rmse_std": test_rmse_std,
-            }
-        )
-
     now = (datetime.now() + timedelta(hours=9)).strftime("%Y%m%d-%H%M%S")  # KST time
 
     log_out_path = os.path.join(
@@ -289,17 +217,16 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_name",
         type=str,
-        default="dkt",
+        default="cl4kt",
         help="The name of the model to train. \
-            The possible models are in [dkt, dkvmn, sakt, akt]. \
-            The default model is dkt.",
+            The possible models are in [akt, cl4kt]. \
+            The default model is cl4kt.",
     )
     parser.add_argument(
         "--data_name",
         type=str,
         default="algebra05",
-        help="The name of the dataset to use in training. \
-            The possible datasets are in [assistments09, assistments12, assistments15, assistments17, algebra05, bridge_algebra06, spanish].",
+        help="The name of the dataset to use in training.",
     )
     parser.add_argument(
         "--reg_cl",
@@ -351,11 +278,9 @@ if __name__ == "__main__":
         cfg.cl4kt_config.negative_prob = args.negative_prob
         cfg.cl4kt_config.dropout = args.dropout
         cfg.cl4kt_config.l2 = args.l2
-    else:  # sakt, akt
+    else:  # akt
         cfg.akt_config.l2 = args.l2
         cfg.akt_config.dropout = args.dropout
-        cfg.sakt_config.l2 = args.l2
-        cfg.sakt_config.dropout = args.dropout
 
     cfg.freeze()
 
