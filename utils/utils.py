@@ -1,47 +1,8 @@
+import math
 import numpy as np
-from numpy.core.fromnumeric import shape
 from torch.nn.utils.rnn import pad_sequence
 from torch import FloatTensor, LongTensor
 import torch
-import random
-
-
-def augment_kt_seqs(
-    q_seq,
-    s_seq,
-    r_seq,
-    q_mask_prob,
-    s_mask_prob,
-    r_mask_prob,
-    q_mask_id,
-    s_mask_id,
-    r_mask_id,
-    seed=None,
-    skill_rel=None,
-):
-    random.seed(seed)
-    masked_q_seq = []
-    masked_s_seq = []
-    masked_r_seq = []
-
-    for i, q in enumerate(q_seq):
-        prob = random.random()
-        if prob < q_mask_prob and q != 0:
-            masked_q_seq.append(q_mask_id)
-        else:
-            masked_q_seq.append(q)
-        prob = random.random()
-        if prob < s_mask_prob and q != 0:
-            masked_s_seq.append(s_mask_id)
-        else:
-            masked_s_seq.append(s_seq[i])
-        prob = random.random()
-        if prob < r_mask_prob and q != 0:
-            masked_r_seq.append(r_mask_id)
-        else:
-            masked_r_seq.append(r_seq[i])
-
-    return masked_q_seq, masked_s_seq, masked_r_seq
 
 
 # https://github.com/Bjarten/early-stopping-pytorch/blob/master/pytorchtools.py
@@ -101,61 +62,6 @@ class EarlyStopping:
             )
         torch.save(model.state_dict(), self.path)
         self.val_loss_min = val_loss
-
-
-def preprocess_qr(questions, responses, seq_len, pad_val=-1):
-    """
-    split the interactions whose length is more than seq_len
-    """
-    preprocessed_questions = []
-    preprocessed_responses = []
-
-    for q, r in zip(questions, responses):
-        i = 0
-        while i + seq_len < len(q):
-            preprocessed_questions.append(q[i : i + seq_len])
-            preprocessed_responses.append(r[i : i + seq_len])
-
-            i += seq_len
-
-        preprocessed_questions.append(
-            np.concatenate([q[i:], np.array([pad_val] * (i + seq_len - len(q)))])
-        )
-        preprocessed_responses.append(
-            np.concatenate([r[i:], np.array([pad_val] * (i + seq_len - len(q)))])
-        )
-
-    return preprocessed_questions, preprocessed_responses
-
-
-def preprocess_qsr(questions, skills, responses, seq_len, pad_val=0):
-    """
-    split the interactions whose length is more than seq_len
-    """
-    preprocessed_questions = []
-    preprocessed_skills = []
-    preprocessed_responses = []
-
-    for q, s, r in zip(questions, skills, responses):
-        i = 0
-        while i + seq_len < len(q):
-            preprocessed_questions.append(q[i : i + seq_len])
-            preprocessed_skills.append(s[i : i + seq_len])
-            preprocessed_responses.append(r[i : i + seq_len])
-
-            i += seq_len
-
-        preprocessed_questions.append(
-            np.concatenate([q[i:], np.array([pad_val] * (i + seq_len - len(q)))])
-        )
-        preprocessed_skills.append(
-            np.concatenate([s[i:], np.array([pad_val] * (i + seq_len - len(q)))])
-        )
-        preprocessed_responses.append(
-            np.concatenate([r[i:], np.array([-1] * (i + seq_len - len(q)))])
-        )
-
-    return preprocessed_questions, preprocessed_skills, preprocessed_responses
 
 
 def collate_question_response_fn(batches, pad_val=-1):
@@ -312,51 +218,100 @@ def collate_fn(batches):
     return feed_dict
 
 
-def augmented_collate_fn(batches):
-    aug_q_seq_1 = []
-    aug_q_seq_2 = []
-    aug_q_seq = []
-    aug_s_seq_1 = []
-    aug_s_seq_2 = []
-    aug_s_seq = []
-    aug_r_seq_1 = []
-    aug_r_seq_2 = []
-    aug_r_seq = []
+# def augmented_collate_fn(batches):
+#     aug_q_seq_1 = []
+#     aug_q_seq_2 = []
+#     aug_q_seq = []
+#     aug_s_seq_1 = []
+#     aug_s_seq_2 = []
+#     aug_s_seq = []
+#     aug_r_seq_1 = []
+#     aug_r_seq_2 = []
+#     aug_r_seq = []
 
-    for batch in batches:
-        aug_q_seq_1.append(LongTensor(batch["questions"][0]))
-        aug_q_seq_2.append(LongTensor(batch["questions"][1]))
-        aug_q_seq.append(LongTensor(batch["questions"][2]))
-        aug_s_seq_1.append(LongTensor(batch["skills"][0]))
-        aug_s_seq_2.append(LongTensor(batch["skills"][1]))
-        aug_s_seq.append(LongTensor(batch["skills"][2]))
-        aug_r_seq_1.append(LongTensor(batch["responses"][0]))
-        aug_r_seq_2.append(LongTensor(batch["responses"][1]))
-        aug_r_seq.append(LongTensor(batch["responses"][2]))
+#     for batch in batches:
+#         aug_q_seq_1.append(LongTensor(batch["questions"][0]))
+#         aug_q_seq_2.append(LongTensor(batch["questions"][1]))
+#         aug_q_seq.append(LongTensor(batch["questions"][2]))
+#         aug_s_seq_1.append(LongTensor(batch["skills"][0]))
+#         aug_s_seq_2.append(LongTensor(batch["skills"][1]))
+#         aug_s_seq.append(LongTensor(batch["skills"][2]))
+#         aug_r_seq_1.append(LongTensor(batch["responses"][0]))
+#         aug_r_seq_2.append(LongTensor(batch["responses"][1]))
+#         aug_r_seq.append(LongTensor(batch["responses"][2]))
 
+#     """
+#     pad_sequence를 통해 list of LongTensor가 [B x L (=200)] 의 Tensor로 변환됨
+#     """
+#     aug_q_seq_1 = pad_sequence(
+#         aug_q_seq_1, batch_first=True, padding_value=0
+#     )
+
+#     aug_q_seq_2 = pad_sequence(
+#         aug_q_seq_2, batch_first=True, padding_value=0
+#     )
+
+#     aug_q_seq = pad_sequence(
+#         aug_q_seq, batch_first=True, padding_value=0
+#     )
+
+#     aug_s_seq_1 = pad_sequence(
+#         aug_s_seq_1, batch_first=True, padding_value=0
+#     )
+
+#     aug_s_seq_2 = pad_sequence(
+#         aug_s_seq_2, batch_first=True, padding_value=0
+#     )
+
+#     aug_s_seq = pad_sequence(
+#         aug_s_seq, batch_first=True, padding_value=0
+#     )
+
+#     aug_r_seq_1 = pad_sequence(
+#         aug_r_seq_1, batch_first=True, padding_value=-1
+#     )
+
+#     aug_r_seq_2 = pad_sequence(
+#         aug_r_seq_2, batch_first=True, padding_value=-1
+#     )
+
+#     aug_r_seq = pad_sequence(
+#         aug_r_seq, batch_first=True, padding_value=-1
+#     )
+#     feed_dict = {
+#         "questions": (aug_q_seq_1, aug_q_seq_2, aug_q_seq),
+#         "skills": (aug_s_seq_1, aug_s_seq_2, aug_s_seq),
+#         "responses": (aug_r_seq_1, aug_r_seq_2, aug_r_seq)
+#     }
+#     return feed_dict
+
+# https://github.com/theophilee/learner-performance-prediction/blob/master/utils/queue.py
+class TimeWindowQueue:
+    """A queue for counting efficiently the number of events within time windows.
+    Complexity:
+        All operators in amortized O(W) time where W is the number of windows.
+    From JJ's KTM repository: https://github.com/jilljenn/ktm.
     """
-    pad_sequence를 통해 list of LongTensor가 [B x L (=200)] 의 Tensor로 변환됨
-    """
-    aug_q_seq_1 = pad_sequence(aug_q_seq_1, batch_first=True, padding_value=0)
 
-    aug_q_seq_2 = pad_sequence(aug_q_seq_2, batch_first=True, padding_value=0)
+    def __init__(self, window_lengths):
+        self.queue = []
+        self.window_lengths = window_lengths
+        self.cursors = [0] * len(self.window_lengths)
 
-    aug_q_seq = pad_sequence(aug_q_seq, batch_first=True, padding_value=0)
+    def __len__(self):
+        return len(self.queue)
 
-    aug_s_seq_1 = pad_sequence(aug_s_seq_1, batch_first=True, padding_value=0)
+    def get_counters(self, t):
+        self.update_cursors(t)
+        return [len(self.queue)] + [len(self.queue) - cursor for cursor in self.cursors]
 
-    aug_s_seq_2 = pad_sequence(aug_s_seq_2, batch_first=True, padding_value=0)
+    def push(self, time):
+        self.queue.append(time)
 
-    aug_s_seq = pad_sequence(aug_s_seq, batch_first=True, padding_value=0)
-
-    aug_r_seq_1 = pad_sequence(aug_r_seq_1, batch_first=True, padding_value=-1)
-
-    aug_r_seq_2 = pad_sequence(aug_r_seq_2, batch_first=True, padding_value=-1)
-
-    aug_r_seq = pad_sequence(aug_r_seq, batch_first=True, padding_value=-1)
-    feed_dict = {
-        "questions": (aug_q_seq_1, aug_q_seq_2, aug_q_seq),
-        "skills": (aug_s_seq_1, aug_s_seq_2, aug_s_seq),
-        "responses": (aug_r_seq_1, aug_r_seq_2, aug_r_seq),
-    }
-    return feed_dict
+    def update_cursors(self, t):
+        for pos, length in enumerate(self.window_lengths):
+            while (
+                self.cursors[pos] < len(self.queue)
+                and t - self.queue[self.cursors[pos]] >= length
+            ):
+                self.cursors[pos] += 1
