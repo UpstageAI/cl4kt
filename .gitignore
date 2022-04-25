@@ -135,7 +135,7 @@ __pycache__
 .ckpts
 .git
 *.ipynb
-dataset/*
+dataset/*/*
 logs/*
 wandb
 saved_model/*
