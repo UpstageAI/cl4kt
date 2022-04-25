@@ -127,3 +127,16 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+__pycache__
+.DS_Store
+.idea
+.ipynb_checkpoints
+.ckpts
+.git
+*.ipynb
+dataset/*
+logs/*
+wandb
+saved_model/*
+run.sh
