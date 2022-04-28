@@ -1,7 +1,7 @@
 # Contrastive Learning for Knowledge Tracing
 This is our implementation for the paper "Contrastive Learning for Knowledge Tracing" (TheWebConf 2022).
 
-To run CL4KT, please create the configuration file (`/configs/example.yaml`) and the raw dataset (e.g., `/datatset/algebra05/data.txt`, `/datatset/assistments09/data.csv`, etc.).
+To run CL4KT, please prepare the configuration file (`configs/example.yaml`) and the raw dataset (e.g., `datatset/algebra05/data.txt`, `datatset/assistments09/data.csv`, etc.).
 
 Please use the following script to run data preprocessing:
 `python preprocess_data.py --data_name algebra05 --min_user_inter_num 5`
