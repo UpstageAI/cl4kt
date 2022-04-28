@@ -94,34 +94,6 @@ def collate_question_response_fn(batches, pad_val=-1):
         deltas * masks,
     )
 
-    """
-    seq_len=10, pad_val=-1 일때 예제
-
-
-    questions[10], responses[10], targets[10], deltas[10]
-        (tensor([78, 78, 30, 30, 30, 15, 15, 15, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                -1, -1]),
-        tensor([ 1,  1,  1,  1,  1,  0,  1,  1,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                -1, -1]),
-        tensor([ 1.,  1.,  1.,  1.,  0.,  1.,  1.,  1., -1., -1., -1., -1., -1., -1.,
-                -1., -1., -1., -1., -1., -1.]),
-        tensor([78, 30, 30, 30, 15, 15, 15, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                -1, -1]))
-
-    masks[10]
-        tensor([ True,  True,  True,  True,  True,  True,  True,  True, False, False,
-                False, False, False, False, False, False, False, False, False, False])
-
-    (questions * masks)[10], (responses*masks)[10], (targets*masks)[10], (deltas*masks)[10]
-        (tensor([78, 78, 30, 30, 30, 15, 15, 15,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-                0,  0]),
-        tensor([1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
-        tensor([1., 1., 1., 1., 0., 1., 1., 1., -0., -0., -0., -0., -0., -0., -0., -0., -0., -0.,
-                -0., -0.]),
-        tensor([78, 30, 30, 30, 15, 15, 15, 15,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-                0,  0]))
-        
-    """
 
     return questions, responses, targets, deltas, masks
 
@@ -142,9 +114,6 @@ def collate_question_skill_response_fn(batches, pad_val=-1):
         delta_questions.append(LongTensor(batch["questions"][1:]))
         delta_skills.append(LongTensor(batch["skills"][1:]))
 
-    """
-    pad_sequence를 통해 list of LongTensor가 [B x L (=200)] 의 Tensor로 변환됨
-    """
     questions = pad_sequence(questions, batch_first=True, padding_value=pad_val)
     skills = pad_sequence(skills, batch_first=True, padding_value=pad_val)
     responses = pad_sequence(responses, batch_first=True, padding_value=pad_val)
@@ -165,34 +134,6 @@ def collate_question_skill_response_fn(batches, pad_val=-1):
         delta_skills * masks,
     )
 
-    """
-    seq_len=10, pad_val=-1 일때 예제
-
-
-    questions[10], responses[10], targets[10], deltas[10]
-        (tensor([78, 78, 30, 30, 30, 15, 15, 15, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                -1, -1]),
-        tensor([ 1,  1,  1,  1,  1,  0,  1,  1,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                -1, -1]),
-        tensor([ 1.,  1.,  1.,  1.,  0.,  1.,  1.,  1., -1., -1., -1., -1., -1., -1.,
-                -1., -1., -1., -1., -1., -1.]),
-        tensor([78, 30, 30, 30, 15, 15, 15, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                -1, -1]))
-
-    masks[10]
-        tensor([ True,  True,  True,  True,  True,  True,  True,  True, False, False,
-                False, False, False, False, False, False, False, False, False, False])
-
-    (questions * masks)[10], (responses*masks)[10], (targets*masks)[10], (deltas*masks)[10]
-        (tensor([78, 78, 30, 30, 30, 15, 15, 15,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-                0,  0]),
-        tensor([1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
-        tensor([1., 1., 1., 1., 0., 1., 1., 1., -0., -0., -0., -0., -0., -0., -0., -0., -0., -0.,
-                -0., -0.]),
-        tensor([78, 30, 30, 30, 15, 15, 15, 15,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-                0,  0]))
-        
-    """
 
     return questions, skills, responses, targets, delta_questions, delta_skills, masks
 
@@ -208,111 +149,9 @@ def collate_fn(batches):
         skills.append(LongTensor(batch["skills"]))
         responses.append(LongTensor(batch["responses"]))
 
-    """
-    pad_sequence를 통해 list of LongTensor가 [B x L (=200)] 의 Tensor로 변환됨
-    """
     questions = pad_sequence(questions, batch_first=True, padding_value=0)
     skills = pad_sequence(skills, batch_first=True, padding_value=0)
     responses = pad_sequence(responses, batch_first=True, padding_value=-1)
 
     feed_dict = {"questions": questions, "skills": skills, "responses": responses}
     return feed_dict
-
-
-# def augmented_collate_fn(batches):
-#     aug_q_seq_1 = []
-#     aug_q_seq_2 = []
-#     aug_q_seq = []
-#     aug_s_seq_1 = []
-#     aug_s_seq_2 = []
-#     aug_s_seq = []
-#     aug_r_seq_1 = []
-#     aug_r_seq_2 = []
-#     aug_r_seq = []
-
-#     for batch in batches:
-#         aug_q_seq_1.append(LongTensor(batch["questions"][0]))
-#         aug_q_seq_2.append(LongTensor(batch["questions"][1]))
-#         aug_q_seq.append(LongTensor(batch["questions"][2]))
-#         aug_s_seq_1.append(LongTensor(batch["skills"][0]))
-#         aug_s_seq_2.append(LongTensor(batch["skills"][1]))
-#         aug_s_seq.append(LongTensor(batch["skills"][2]))
-#         aug_r_seq_1.append(LongTensor(batch["responses"][0]))
-#         aug_r_seq_2.append(LongTensor(batch["responses"][1]))
-#         aug_r_seq.append(LongTensor(batch["responses"][2]))
-
-#     """
-#     pad_sequence를 통해 list of LongTensor가 [B x L (=200)] 의 Tensor로 변환됨
-#     """
-#     aug_q_seq_1 = pad_sequence(
-#         aug_q_seq_1, batch_first=True, padding_value=0
-#     )
-
-#     aug_q_seq_2 = pad_sequence(
-#         aug_q_seq_2, batch_first=True, padding_value=0
-#     )
-
-#     aug_q_seq = pad_sequence(
-#         aug_q_seq, batch_first=True, padding_value=0
-#     )
-
-#     aug_s_seq_1 = pad_sequence(
-#         aug_s_seq_1, batch_first=True, padding_value=0
-#     )
-
-#     aug_s_seq_2 = pad_sequence(
-#         aug_s_seq_2, batch_first=True, padding_value=0
-#     )
-
-#     aug_s_seq = pad_sequence(
-#         aug_s_seq, batch_first=True, padding_value=0
-#     )
-
-#     aug_r_seq_1 = pad_sequence(
-#         aug_r_seq_1, batch_first=True, padding_value=-1
-#     )
-
-#     aug_r_seq_2 = pad_sequence(
-#         aug_r_seq_2, batch_first=True, padding_value=-1
-#     )
-
-#     aug_r_seq = pad_sequence(
-#         aug_r_seq, batch_first=True, padding_value=-1
-#     )
-#     feed_dict = {
-#         "questions": (aug_q_seq_1, aug_q_seq_2, aug_q_seq),
-#         "skills": (aug_s_seq_1, aug_s_seq_2, aug_s_seq),
-#         "responses": (aug_r_seq_1, aug_r_seq_2, aug_r_seq)
-#     }
-#     return feed_dict
-
-# https://github.com/theophilee/learner-performance-prediction/blob/master/utils/queue.py
-class TimeWindowQueue:
-    """A queue for counting efficiently the number of events within time windows.
-    Complexity:
-        All operators in amortized O(W) time where W is the number of windows.
-    From JJ's KTM repository: https://github.com/jilljenn/ktm.
-    """
-
-    def __init__(self, window_lengths):
-        self.queue = []
-        self.window_lengths = window_lengths
-        self.cursors = [0] * len(self.window_lengths)
-
-    def __len__(self):
-        return len(self.queue)
-
-    def get_counters(self, t):
-        self.update_cursors(t)
-        return [len(self.queue)] + [len(self.queue) - cursor for cursor in self.cursors]
-
-    def push(self, time):
-        self.queue.append(time)
-
-    def update_cursors(self, t):
-        for pos, length in enumerate(self.window_lengths):
-            while (
-                self.cursors[pos] < len(self.queue)
-                and t - self.queue[self.cursors[pos]] >= length
-            ):
-                self.cursors[pos] += 1
