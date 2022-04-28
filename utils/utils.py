@@ -63,7 +63,8 @@ class EarlyStopping:
         torch.save(model.state_dict(), self.path)
         self.val_loss_min = val_loss
 
-
+# the following collate functions are based on the code:
+# https://github.com/hcnoh/knowledge-tracing-collection-pytorch
 def collate_question_response_fn(batches, pad_val=-1):
     questions = []
     responses = []
