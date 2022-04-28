@@ -281,7 +281,8 @@ def prepare_spanish():
 
 def prepare_slepemapy(min_user_inter_num):
     """
-    ref: https://github.com/THUwangcy/HawkesKT/blob/main/data/Preprocess.ipynb
+    This is forked from:
+    https://github.com/THUwangcy/HawkesKT/blob/main/data/Preprocess.ipynb
     """
 
     data_path = os.path.join(BASE_PATH, "slepemapy")
@@ -360,6 +361,10 @@ def prepare_slepemapy(min_user_inter_num):
 
 
 def prepare_sampled_slepemapy(min_user_inter_num):
+    """
+    This is forked from:
+    https://github.com/THUwangcy/HawkesKT/blob/main/data/Preprocess.ipynb
+    """
     data_path = os.path.join(BASE_PATH, "sampled_slepemapy")
     data_df_cz = pd.read_csv(os.path.join(data_path, "answer.csv"), sep=";")
 
@@ -476,5 +481,4 @@ if __name__ == "__main__":
         prepare_sampled_slepemapy(args.min_user_inter_num)
     elif args.data_name == "statics":
         prepare_statics()
-    elif args.data_name == "sampled_iscream":
-        prepare_iscream_s3(args.min_user_inter_num)
+
